@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_id": "ticketbot-65826",
-    "project_number": "962503070381",
-    "name": "TicketBot"
+    "project_id": "default-demo-app-5d5f",
+    "project_number": "403488595617",
+    "name": "Default Demo App"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:962503070381:android:0685aeae28d0aab1",
+        "mobilesdk_app_id": "1:403488595617:android:0685aeae28d0aab1",
         "client_id": "android:com.dongholab.ticketbot",
         "client_type": 1,
         "android_client_info": {

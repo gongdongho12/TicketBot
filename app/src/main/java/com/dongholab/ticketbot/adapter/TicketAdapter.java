@@ -39,7 +39,6 @@ public class TicketAdapter extends ArrayAdapter<Soldout> {
 
         train_num = (TextView)view.findViewById(R.id.train_num);
         train_category = (TextView)view.findViewById(R.id.train_category);
-        check_text = (TextView)view.findViewById(R.id.check_text);
         start_time = (TextView)view.findViewById(R.id.start_time);
         end_time = (TextView)view.findViewById(R.id.end_time);
         check = (ImageView)view.findViewById(R.id.check);
@@ -58,7 +57,6 @@ public class TicketAdapter extends ArrayAdapter<Soldout> {
             train_category.setText("무궁화");
         }
 
-        check_text.setText(getContext().getResources().getString(R.string.check_text_on));
         start_time.setText(data.getTime_departure());
         end_time.setText(data.getTime_arrive());
 

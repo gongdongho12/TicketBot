@@ -75,6 +75,8 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/check_text_on"
+            android:visibility="gone"
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -94,9 +96,31 @@
                 android:textColor="@color/basic"
                 android:textSize="10sp"
                 android:text="@string/check_text_on"
-                android:id="@+id/check_text"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="5dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/check_text_off"
+            android:orientation="horizontal"
+            android:background="@color/basic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#ffffff"
+                android:textSize="10sp"
+                android:text="@string/check_text_off"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp" />
         </LinearLayout>
     </LinearLayout>
 

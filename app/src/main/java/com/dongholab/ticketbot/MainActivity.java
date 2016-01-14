@@ -59,6 +59,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //UI Adapter
     TicketAdapter m_ticketAdapter;
 
+    //매진티켓 리스트
+    List<Soldout> soldoutList;
+
+    //position값
+    int posistion_key = 0;
+
+    //만료시간
+    int expire_seconds = 15;
+
     //api주소
     String m_server_php = "http://1.214.121.11:44444/";
     String m_server_node = "http://1.214.121.11:50005/";
@@ -67,10 +76,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = "MainActivity";
 
     //GCM 버튼
-    private Button mRegistrationButton; //-
-    private ProgressBar mRegistrationProgressBar; //-
+    //private Button mRegistrationButton; //-
+    //private ProgressBar mRegistrationProgressBar; //-
     private BroadcastReceiver mRegistrationBroadcastReceiver;
-    private TextView mInformationTextView;
+    //private TextView mInformationTextView;
 
     public void getInstanceIdToken() {
         if (checkPlayServices()) {
@@ -88,20 +97,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 String action = intent.getAction();
                 if (action.equals(QuickstartPreferences.REGISTRATION_READY)) {
                     // 액션이 READY일 경우
-                    mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
-                    mInformationTextView.setVisibility(View.GONE);
+                    //mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
+                    //mInformationTextView.setVisibility(View.GONE);
                 } else if (action.equals(QuickstartPreferences.REGISTRATION_GENERATING)) {
                     // 액션이 GENERATING일 경우
-                    mRegistrationProgressBar.setVisibility(ProgressBar.VISIBLE);
-                    mInformationTextView.setVisibility(View.VISIBLE);
-                    mInformationTextView.setText(getString(R.string.registering_message_generating));
+                    //mRegistrationProgressBar.setVisibility(ProgressBar.VISIBLE);
+                    //mInformationTextView.setVisibility(View.VISIBLE);
+                    //mInformationTextView.setText(getString(R.string.registering_message_generating));
                 } else if (action.equals(QuickstartPreferences.REGISTRATION_COMPLETE)) {
                     // 액션이 COMPLETE일 경우
-                    mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
-                    mRegistrationButton.setText(getString(R.string.registering_message_complete));
-                    mRegistrationButton.setEnabled(false);
+                    //mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
+                    //mRegistrationButton.setText(getString(R.string.registering_message_complete));
+                    //mRegistrationButton.setEnabled(false);
                     String token = intent.getStringExtra("token");
-                    mInformationTextView.setText(token);
+                    Log.d("token", token);
+                    Reservate_Task reservate_task = new Reservate_Task();
+
+                    Soldout soldout = soldoutList.get(posistion_key);
+                    reservate_task.execute(m_server_node, token, String.valueOf(soldout.getTrain_number()), soldout.getCity_departure(), soldout.getTime_departure(), soldout.getCity_arrival(), String.valueOf(expire_seconds));
+                    //mInformationTextView.setText(token);
                 }
             }
         };
@@ -188,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     /**
-     * Google Play Service를 사용할 수 있는 환경이지를 체크한다.
+     * Google Play Service를 사용할 수 있는 환경인지를 체크한다.
      */
     private boolean checkPlayServices() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -214,7 +228,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-
         if (id == R.id.action_settings) {
             return true;
         }
@@ -233,7 +246,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     new DatePickerDialog(MainActivity.this, dateSetListener, m_year, m_month, m_day).show();
                 }
                 break;
-
             default:
                 break;
         }
@@ -274,14 +286,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        
+        this.posistion_key = position;
+        getInstanceIdToken();
+
+        LinearLayout on = (LinearLayout) view.findViewById(R.id.check_text_on);
+        LinearLayout off = (LinearLayout) view.findViewById(R.id.check_text_off);
+
+        off.setVisibility(View.GONE);
+        on.setVisibility(View.VISIBLE);
     }
 
     //Json 파싱
     public class SoldoutList_Task extends AsyncTask<String, Void, List<Soldout>> {
 
         Gson gson;
-        List<Soldout> soldoutList;
 
         @Override
         protected void onPreExecute() {
@@ -361,8 +379,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             Map<String, String> query = new HashMap<String, String>();
             query.put("gcm_key", params[1]);
-            query.put("title", params[2]);
-            query.put("message", params[3]);
+            query.put("train_num", params[2]);
+            query.put("start_location", params[3]);
+            query.put("start_time", params[4]);
+            query.put("dest_location", params[5]);
+            query.put("expire_seconds", params[6]);
             Check check = ticketbot_api.getReservate(query);
 
             return check;
@@ -371,7 +392,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void onPostExecute(Check data) {
             super.onPostExecute(data);
-            Toast.makeText(MainActivity.this, "예약 완료", Toast.LENGTH_SHORT).show();
+            if(data.getSuccess()) {
+                Toast.makeText(MainActivity.this, "예약 완료", Toast.LENGTH_SHORT).show();
+            }else{
+                Toast.makeText(MainActivity.this, "에러", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
