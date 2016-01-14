@@ -19,30 +19,45 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
+
+import com.dongholab.ticketbot.adapter.TicketAdapter;
 import com.dongholab.ticketbot.api.TicketbotAPI;
+import com.dongholab.ticketbot.data.Soldout;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import retrofit.GsonConverterFactory;
-import retrofit.Retrofit;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import retrofit.RestAdapter;
+import retrofit.converter.GsonConverter;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     GregorianCalendar m_calendar;
     int m_year, m_month, m_day, m_hour, m_min;
     EditText m_start, m_end;
-    LinearLayout m_datearea;
+    LinearLayout m_dateArea;
 
     TextView m_date;
 
+    ListView m_tiketList;
+
+    //UI Adapter
+    TicketAdapter m_ticketAdapter;
+
     //api주소
-    String m_server = "http://1.214.121.11:44444/KMU/test1.php";
+    String m_server = "http://1.214.121.11:44444/";
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String TAG = "MainActivity";
@@ -62,21 +77,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
 
-    public void registBroadcastReceiver(){
+    public void registBroadcastReceiver() {
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                if(action.equals(QuickstartPreferences.REGISTRATION_READY)){
+                if (action.equals(QuickstartPreferences.REGISTRATION_READY)) {
                     // 액션이 READY일 경우
                     mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
                     mInformationTextView.setVisibility(View.GONE);
-                } else if(action.equals(QuickstartPreferences.REGISTRATION_GENERATING)){
+                } else if (action.equals(QuickstartPreferences.REGISTRATION_GENERATING)) {
                     // 액션이 GENERATING일 경우
                     mRegistrationProgressBar.setVisibility(ProgressBar.VISIBLE);
                     mInformationTextView.setVisibility(View.VISIBLE);
                     mInformationTextView.setText(getString(R.string.registering_message_generating));
-                } else if(action.equals(QuickstartPreferences.REGISTRATION_COMPLETE)){
+                } else if (action.equals(QuickstartPreferences.REGISTRATION_COMPLETE)) {
                     // 액션이 COMPLETE일 경우
                     mRegistrationProgressBar.setVisibility(ProgressBar.GONE);
                     mRegistrationButton.setText(getString(R.string.registering_message_complete));
@@ -102,19 +117,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         m_calendar = new GregorianCalendar();
         m_year = m_calendar.get(Calendar.YEAR);
         m_month = m_calendar.get(Calendar.MONTH);
-        m_day= m_calendar.get(Calendar.DAY_OF_MONTH);
+        m_day = m_calendar.get(Calendar.DAY_OF_MONTH);
         m_hour = m_calendar.get(Calendar.HOUR_OF_DAY);
         m_min = m_calendar.get(Calendar.MINUTE);
 
-        m_start = (EditText)findViewById(R.id.start);
-        m_end = (EditText)findViewById(R.id.end);
+        m_start = (EditText) findViewById(R.id.start);
+        m_end = (EditText) findViewById(R.id.end);
 
-        m_datearea = (LinearLayout)findViewById(R.id.datearea);
+        m_dateArea = (LinearLayout) findViewById(R.id.datearea);
 
-        m_date = (TextView)findViewById(R.id.date);
+        m_date = (TextView) findViewById(R.id.date);
         m_date.setText(String.format("%04d년 %02d월 %02d일 %02d시", m_year, m_month + 1, m_day, m_hour));
 
-        m_datearea.setOnClickListener(this);
+        m_tiketList = (ListView) findViewById(R.id.ticketlist);
+
+        m_dateArea.setOnClickListener(this);
 
         /*
         // 토큰을 보여줄 TextView를 정의
@@ -182,33 +199,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return true;
     }
 
-    //날짜 선택
-    private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
-        @Override
-        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-            m_year = year;
-            m_month = monthOfYear;
-            m_day = dayOfMonth;
-            //String msg = String.format("%d / %d / %d", year, monthOfYear+1, dayOfMonth);
-            //Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
-            TimePickerDialog timeDlg = new TimePickerDialog(MainActivity.this, timeSetListener, m_hour, m_min, false);
-            timeDlg.show();
-        }
-    };
-
-    //시간 선택
-    private TimePickerDialog.OnTimeSetListener timeSetListener = new TimePickerDialog.OnTimeSetListener() {
-
-        @Override
-        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            String msg = String.format("%d / %d / %d", m_year, m_month + 1, m_day);
-            String date = String.format("%04d-%02d-%02d", m_year, m_month + 1, m_day);
-            Log.d("date", date);
-            m_date.setText(String.format("%04d년 %02d월 %02d일 %02d시", m_year, m_month + 1, m_day, hourOfDay));
-            //Toast.makeText(MainActivity.this, m_start.getText() + " / " + m_end.getText() + " / " + msg + " / " + hourOfDay, Toast.LENGTH_SHORT).show();
-        }
-    };
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -229,40 +219,96 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+
+        switch (v.getId()) {
             case R.id.datearea:
-                new DatePickerDialog(MainActivity.this, dateSetListener, m_year, m_month, m_day).show();
+                if (m_start.getText().length() == 0 || m_end.getText().length() == 0) {
+                    Toast.makeText(getBaseContext(), "역을 입력해주세요", Toast.LENGTH_SHORT).show();
+                } else {
+                    new DatePickerDialog(MainActivity.this, dateSetListener, m_year, m_month, m_day).show();
+                }
+                break;
+
+            default:
                 break;
         }
     }
 
+    //날짜 선택
+    private DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            m_year = year;
+            m_month = monthOfYear;
+            m_day = dayOfMonth;
+
+            //m_date.setText(String.format("%04d년 %02d월 %02d일 %02d시", m_year, m_month + 1, m_day, m_hour));
+            //String msg = String.format("%d / %d / %d", year, monthOfYear+1, dayOfMonth);
+            //Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+            TimePickerDialog timeDlg = new TimePickerDialog(MainActivity.this, timeSetListener, m_hour, m_min, false);
+            timeDlg.show();
+        }
+    };
+
+    //시간 선택
+    private TimePickerDialog.OnTimeSetListener timeSetListener = new TimePickerDialog.OnTimeSetListener() {
+
+        @Override
+        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+            //String msg = String.format("%d / %d / %d", m_year, m_month + 1, m_day);
+            //String date = String.format("%04d-%02d-%02d", m_year, m_month + 1, m_day);
+            //Log.d("date", date);
+
+            //현재 API가 시간 입력이 없으므로 생략합니다.
+            SoldoutList_Task soldoutList_task = new SoldoutList_Task();
+            soldoutList_task.execute(m_server, m_start.getText().toString(), m_end.getText().toString(), String.format("%04d-%02d-%02d", m_year, m_month + 1, m_day), String.format("%02d", hourOfDay));
+            m_date.setText(String.format("%04d년 %02d월 %02d일 %02d시", m_year, m_month + 1, m_day, hourOfDay));
+            //Toast.makeText(MainActivity.this, m_start.getText() + " / " + m_end.getText() + " / " + msg + " / " + hourOfDay, Toast.LENGTH_SHORT).show();
+        }
+    };
+
     //Json 파싱
-    public class SoldoutList_Task extends AsyncTask<String, Integer, String> {
+    public class SoldoutList_Task extends AsyncTask<String, Void, List<Soldout>> {
 
         Gson gson;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
+            Log.d("Async", "시작");
+            gson = new GsonBuilder()/*.setDateFormat("yyyy-MM-dd")*/.create();
         }
 
         @Override
-        protected String doInBackground(String... params) {
+        protected List<Soldout> doInBackground(String... params) {
+            //params 0 시작위치, 1 나중위치
+            for(String d : params) {
+                Log.d("prameter", d);
+            }
             //retrofit 적용
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("m_server")
-                    .addConverterFactory(GsonConverterFactory.create(gson))
+            RestAdapter retrofit = new RestAdapter.Builder()
+                    .setEndpoint(params[0])
+                    .setConverter(new GsonConverter(gson))
                     .build();
 
-            TicketbotAPI service = retrofit.create(TicketbotAPI.class);
+            TicketbotAPI ticketbot_api = retrofit.create(TicketbotAPI.class);
 
-            return params[0];
+            Map<String, String> query = new HashMap<String, String>();
+            query.put("api", "list");
+            query.put("departure", params[1]);
+            query.put("arrive", params[2]);
+            query.put("date", params[3]);
+            query.put("hour", params[4]);
+            List<Soldout> soldoutList = ticketbot_api.getSoldoutList(query);
+
+            return soldoutList;
         }
 
         @Override
-        protected void onPostExecute(String data) {
+        protected void onPostExecute(List<Soldout> data) {
             super.onPostExecute(data);
+            m_ticketAdapter = new TicketAdapter(getBaseContext(), R.layout.row, data);
+            m_tiketList.setAdapter(m_ticketAdapter);
         }
     }
 }

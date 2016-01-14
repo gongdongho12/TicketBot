@@ -1,16 +1,14 @@
 package com.dongholab.ticketbot.api;
 
-import com.dongholab.ticketbot.data.Check;
-import com.dongholab.ticketbot.data.SoldoutList;
+import com.dongholab.ticketbot.data.Soldout;
+import java.util.List;
+import java.util.Map;
 
 import retrofit.http.GET;
+import retrofit.http.QueryMap;
 
 public interface TicketbotAPI {
 
-    @GET("")
-    SoldoutList getSoldoutList();
-
-    @GET("")
-    Check setReservate();
-
+    @GET("/KMU/test1.php")
+    List<Soldout> getSoldoutList(@QueryMap Map<String, String> query);
 }

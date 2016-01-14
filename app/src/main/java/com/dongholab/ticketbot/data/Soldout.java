@@ -7,7 +7,6 @@ public class Soldout {
     String time_departure;
     String city_arrival;
     String time_arrive;
-    String train_category;
 
     public String getStatus() {
         return this.status;
@@ -31,9 +30,5 @@ public class Soldout {
 
     public String getTime_arrive() {
         return this.time_arrive;
-    }
-
-    public String getTrain_category() {
-        return this.train_category;
     }
 }

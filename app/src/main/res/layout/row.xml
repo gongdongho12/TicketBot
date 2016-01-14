@@ -17,7 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
-            android:layout_marginTop="20dp">
+            android:layout_marginTop="5dp">
 
             <LinearLayout
                 android:orientation="vertical"
@@ -31,7 +31,7 @@
                     android:text="호"
                     android:textStyle="bold"
                     android:textColor="@color/trainnum"
-                    android:textSize="22sp"
+                    android:textSize="17sp"
                     android:id="@+id/train_num"
                     android:layout_gravity="center_horizontal" />
 
@@ -41,7 +41,7 @@
                     android:textColor="@color/trainnum"
                     android:textStyle="bold"
                     android:text="열차 종류"
-                    android:textSize="22sp"
+                    android:textSize="17sp"
                     android:id="@+id/train_category"
                     android:layout_gravity="center_horizontal" />
             </LinearLayout>
@@ -50,24 +50,27 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="시간"
-                android:textSize="50sp"
+                android:textSize="30sp"
                 android:textColor="@color/basic"
-                android:id="@+id/start_time" />
+                android:id="@+id/start_time"
+                android:layout_gravity="center_vertical" />
 
             <ImageView
-                android:layout_width="48dp"
-                android:layout_height="59dp"
+                android:layout_width="29dp"
+                android:layout_height="36dp"
                 android:src="@drawable/train"
                 android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp" />
+                android:layout_marginRight="10dp"
+                android:layout_gravity="center_vertical" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="시간"
-                android:textSize="50sp"
+                android:textSize="30sp"
                 android:textColor="@color/basic"
-                android:id="@+id/end_time" />
+                android:id="@+id/end_time"
+                android:layout_gravity="center_vertical" />
 
         </LinearLayout>
 
@@ -76,24 +79,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
-            android:layout_marginTop="15dp"
-            android:layout_marginBottom="20dp">
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp">
 
             <ImageView
                 android:id="@+id/check"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
+                android:layout_width="15dp"
+                android:layout_height="15dp"
                 android:src="@drawable/check" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/basic"
-                android:textSize="16sp"
+                android:textSize="10sp"
                 android:text="@string/check_text_on"
                 android:id="@+id/check_text"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="20dp" />
+                android:layout_marginLeft="5dp" />
         </LinearLayout>
     </LinearLayout>
 

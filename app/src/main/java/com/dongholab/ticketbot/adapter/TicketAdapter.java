@@ -45,8 +45,19 @@ public class TicketAdapter extends ArrayAdapter<Soldout> {
         check = (ImageView)view.findViewById(R.id.check);
 
         //값 변경
-        train_num.setText(data.getCity_departure());
-        train_category.setText(data.getTrain_category());
+        train_num.setText(String.valueOf(data.getTrain_number()));
+
+        if(data.getTrain_number() < 400){
+            //KTX
+            train_category.setText("KTX");
+        }else if(1000 <= data.getTrain_number() && data.getTrain_number() < 1200){
+            //새마을
+            train_category.setText("새마을");
+        }else{
+            //무궁화
+            train_category.setText("무궁화");
+        }
+
         check_text.setText(getContext().getResources().getString(R.string.check_text_on));
         start_time.setText(data.getTime_departure());
         end_time.setText(data.getTime_arrive());
