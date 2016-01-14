@@ -33,6 +33,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -271,6 +272,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public class SoldoutList_Task extends AsyncTask<String, Void, List<Soldout>> {
 
         Gson gson;
+        List<Soldout> soldoutList;
 
         @Override
         protected void onPreExecute() {
@@ -299,7 +301,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             query.put("arrive", params[2]);
             query.put("date", params[3]);
             query.put("hour", params[4]);
-            List<Soldout> soldoutList = ticketbot_api.getSoldoutList(query);
+            try {
+                soldoutList = ticketbot_api.getSoldoutList(query);
+            }catch (Exception e){
+                soldoutList = null;
+            }
 
             return soldoutList;
         }
@@ -307,7 +313,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected void onPostExecute(List<Soldout> data) {
             super.onPostExecute(data);
-            m_ticketAdapter = new TicketAdapter(getBaseContext(), R.layout.row, data);
+            if (data == null) {
+                Toast.makeText(MainActivity.this, "매진 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+                m_ticketAdapter = new TicketAdapter(getBaseContext(), R.layout.row, new ArrayList<Soldout>());
+            }else{
+                m_ticketAdapter = new TicketAdapter(getBaseContext(), R.layout.row, data);
+            }
             m_tiketList.setAdapter(m_ticketAdapter);
         }
     }
