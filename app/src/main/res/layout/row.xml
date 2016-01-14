@@ -16,12 +16,14 @@
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left" >
+            android:layout_gravity="left"
+            android:layout_marginTop="20dp">
 
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" >
+                android:layout_height="wrap_content"
+                android:layout_marginRight="30dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -30,7 +32,7 @@
                     android:textStyle="bold"
                     android:textColor="@color/trainnum"
                     android:textSize="22sp"
-                    android:id="@+id/textView4"
+                    android:id="@+id/train_num"
                     android:layout_gravity="center_horizontal" />
 
                 <TextView
@@ -40,7 +42,7 @@
                     android:textStyle="bold"
                     android:text="열차 종류"
                     android:textSize="22sp"
-                    android:id="@+id/textView5"
+                    android:id="@+id/train_category"
                     android:layout_gravity="center_horizontal" />
             </LinearLayout>
 
@@ -50,13 +52,14 @@
                 android:text="시간"
                 android:textSize="50sp"
                 android:textColor="@color/basic"
-                android:id="@+id/textView6" />
+                android:id="@+id/start_time" />
 
             <ImageView
                 android:layout_width="48dp"
                 android:layout_height="59dp"
                 android:src="@drawable/train"
-                android:id="@+id/imageView4" />
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -64,7 +67,7 @@
                 android:text="시간"
                 android:textSize="50sp"
                 android:textColor="@color/basic"
-                android:id="@+id/textView7" />
+                android:id="@+id/end_time" />
 
         </LinearLayout>
 
@@ -72,12 +75,14 @@
             android:orientation="horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="left">
+            android:layout_gravity="left"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="20dp">
 
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:id="@+id/imageView5"
+                android:id="@+id/check"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
                 android:src="@drawable/check" />
 
             <TextView
@@ -85,8 +90,10 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/basic"
                 android:textSize="16sp"
-                android:text="이 열차에 대한 알림을 받고 있습니다."
-                android:id="@+id/textView8" />
+                android:text="@string/check_text_on"
+                android:id="@+id/check_text"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="20dp" />
         </LinearLayout>
     </LinearLayout>
 

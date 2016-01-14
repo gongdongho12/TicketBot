@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
     public void registBroadcastReceiver(){
         mRegistrationBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -83,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     String token = intent.getStringExtra("token");
                     mInformationTextView.setText(token);
                 }
-
             }
         };
     }
