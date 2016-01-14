@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -27,6 +28,7 @@ import android.widget.Toast;
 
 import com.dongholab.ticketbot.adapter.TicketAdapter;
 import com.dongholab.ticketbot.api.TicketbotAPI;
+import com.dongholab.ticketbot.data.Check;
 import com.dongholab.ticketbot.data.Soldout;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -43,7 +45,7 @@ import java.util.Map;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemClickListener {
 
     GregorianCalendar m_calendar;
     int m_year, m_month, m_day, m_hour, m_min;
@@ -58,7 +60,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TicketAdapter m_ticketAdapter;
 
     //api주소
-    String m_server = "http://1.214.121.11:44444/";
+    String m_server_php = "http://1.214.121.11:44444/";
+    String m_server_node = "http://1.214.121.11:50005/";
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String TAG = "MainActivity";
@@ -131,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         m_date.setText(String.format("%04d년 %02d월 %02d일 %02d시", m_year, m_month + 1, m_day, m_hour));
 
         m_tiketList = (ListView) findViewById(R.id.ticketlist);
+        m_tiketList.setOnItemClickListener(this);
 
         m_dateArea.setOnClickListener(this);
 
@@ -262,11 +266,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             //현재 API가 시간 입력이 없으므로 생략합니다.
             SoldoutList_Task soldoutList_task = new SoldoutList_Task();
-            soldoutList_task.execute(m_server, m_start.getText().toString(), m_end.getText().toString(), String.format("%04d-%02d-%02d", m_year, m_month + 1, m_day), String.format("%02d", hourOfDay));
+            soldoutList_task.execute(m_server_php, m_start.getText().toString(), m_end.getText().toString(), String.format("%04d-%02d-%02d", m_year, m_month + 1, m_day), String.format("%02d", hourOfDay));
             m_date.setText(String.format("%04d년 %02d월 %02d일 %02d시", m_year, m_month + 1, m_day, hourOfDay));
             //Toast.makeText(MainActivity.this, m_start.getText() + " / " + m_end.getText() + " / " + msg + " / " + hourOfDay, Toast.LENGTH_SHORT).show();
         }
     };
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        
+    }
 
     //Json 파싱
     public class SoldoutList_Task extends AsyncTask<String, Void, List<Soldout>> {
@@ -320,6 +329,49 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 m_ticketAdapter = new TicketAdapter(getBaseContext(), R.layout.row, data);
             }
             m_tiketList.setAdapter(m_ticketAdapter);
+        }
+    }
+
+    //Json 파싱
+    public class Reservate_Task extends AsyncTask<String, Void, Check> {
+
+        Gson gson;
+        Check check;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            Log.d("Async", "시작");
+            gson = new GsonBuilder()/*.setDateFormat("yyyy-MM-dd")*/.create();
+        }
+
+        @Override
+        protected Check doInBackground(String... params) {
+            //params 0 시작위치, 1 나중위치
+            for(String d : params) {
+                Log.d("prameter", d);
+            }
+            //retrofit 적용
+            RestAdapter retrofit = new RestAdapter.Builder()
+                    .setEndpoint(params[0])
+                    .setConverter(new GsonConverter(gson))
+                    .build();
+
+            TicketbotAPI ticketbot_api = retrofit.create(TicketbotAPI.class);
+
+            Map<String, String> query = new HashMap<String, String>();
+            query.put("gcm_key", params[1]);
+            query.put("title", params[2]);
+            query.put("message", params[3]);
+            Check check = ticketbot_api.getReservate(query);
+
+            return check;
+        }
+
+        @Override
+        protected void onPostExecute(Check data) {
+            super.onPostExecute(data);
+            Toast.makeText(MainActivity.this, "예약 완료", Toast.LENGTH_SHORT).show();
         }
     }
 }

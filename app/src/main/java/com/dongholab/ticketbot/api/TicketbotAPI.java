@@ -1,5 +1,6 @@
 package com.dongholab.ticketbot.api;
 
+import com.dongholab.ticketbot.data.Check;
 import com.dongholab.ticketbot.data.Soldout;
 import java.util.List;
 import java.util.Map;
@@ -11,4 +12,7 @@ public interface TicketbotAPI {
 
     @GET("/KMU/test1.php")
     List<Soldout> getSoldoutList(@QueryMap Map<String, String> query);
+
+    @GET("/request_gcm")
+    Check getReservate(@QueryMap Map<String, String> query);
 }
