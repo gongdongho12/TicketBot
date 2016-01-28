@@ -1,9 +1,9 @@
 <?php
 	Class db_model {
-		public $db_host = "localhost";
-		public $db_user = "root";
-		public $db_pass = "DB_Pass";
-		public $db_name = "ticketbot";
+		public $db_host = "DB_HOST";
+		public $db_user = "DB_USER";
+		public $db_pass = "DB_PASS";
+		public $db_name = "DB_NAME";
 
 		function init() {
 			mysql_connect($db_host, $db_user, $db_pass);
@@ -61,8 +61,23 @@
 	}
 	
 	Class RestFunctions {
+		function curl_req($url) {
+		    $ch = curl_init(); 
+
+	        // set url 
+	        curl_setopt($ch, CURLOPT_URL, $url); 
+
+	        //return the transfer as a string 
+	        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+
+	        // $output contains the output string 
+	        $output = curl_exec($ch); 
+
+	        // close curl resource to free up system resources 
+	        curl_close($ch); 
+		}
 		function sendGoogleCloudMessage( $data, $ids ) {
-		    $apiKey = 'gcm-key-for-server';
+		    $apiKey = 'SERVER_KEY';
 		    $url = 'https://gcm-http.googleapis.com/gcm/send';
 		    $post = array(
 		        'registration_ids'  => $ids,
@@ -89,25 +104,41 @@
 			echo "success";
 			sleep($intv);
 		}
+		//http://1.214.121.11:44444/KMU/test1.php?api=list&departure=%EC%84%9C%EC%9A%B8&arrive=%EC%9A%B8%EC%82%B0&date=2016-01-29&hour=23
+		public function newTicketListener($departure, $arrive, $date, $hourInt, $expire, $train_number) {
+			$do = $this->train_check($departure, $arrive, $date, $hourInt, "true");
 
-		public function newTicketListener($gcm_Key, $train_num, $start_location, $start_time, $hourInt, $date, $expire) {
-			$result = $this->train_check($departure, $arrive, $date, $hourInt);
 			$count = 0;
-			while ($count <= $expire) {
-				foreach ($result as $key => $value) {
-					if ($key == "train_number" && $value == $train_number) {
-						if ($status == "예약하기") {
-							$this->device_gcm($gcm_key, $title, $message, $train_num, $start_location, $start_time, $date);
+			// print_r($do[0]);
+			// echo json_encode($do);
+			while ($count <= $expire - 1) {
+				foreach ($do as $key => $value) {
+					if ($value["train_number"] == $train_number) {
+						$status = $value["status"];
+						if ($status == "예약하기") { // 자리 있음 
+							// $this->device_gcm($gcm_key, $title, $message, $train_num, $start_location, $start_time, $date);
+							$content = "[changed] status = $status , train_num = $train_number , count : $count";
+							file_get_contents("https://api.telegram.org/bot132762052:API_TOKEN_BOT/sendMessage?chat_id=46867995&text=$content");
 							exit();
+						} else { // 자리 없음
+							$content = "status = $status , train_num = $train_number , count : $count";
 						}
 					}
+					
 				}
+				
 				$count++;
+				sleep(1);
 			}
+			$m["success"] = "true";
+			$m["data"] = $do;
+			$m["content"] = $content;
+			echo json_encode($m);
+			//echo $departure . "," . $arrive . ',' . $date .','. $hourInt . ',' . $expire;
 		}
 		
-		public function device_gcm($arr) { // ..발표용
-			$server_key = "gcm-key-for-server";
+		public function device_gcm($arr) { // 보여주기식
+			$server_key = "GCM_SERVER_KEY";
 			//"출발시간, 열차날짜, 기차번호 예약 가능합니다"
 
 			// 1~399 KTX
@@ -157,18 +188,20 @@
 
 
 		public function gcm_send($gcm_key) {
-			$server_key = "gcm-server-key";
+			$server_key = "SERVER_GCM";
 			$data = array('title'=>"티켓봇 알림",  'message' => 'sdfsdf');
 			$this->sendGoogleCloudMessage($data, array($gcm_key));
 		}
 
-		public function train_check($departure, $arrive, $date, $hourInt, $where="false" , $where_trainNum="NULL", $where_time="NULL") {
+		public function train_check($departure, $arrive, $date, $hourInt, $printall) {
 			$ch = curl_init();
 			// http://www.letskorail.com/ebizprd/EbizPrdTicketPr21111_i1.do?txtGoStartCode=&txtGoEndCode=&radJobId=1&selGoTrain=05&txtSeatAttCd_4=015&txtSeatAttCd_3=000&txtSeatAttCd_2=000&txtPsgFlg_2=0&txtPsgFlg_3=0&txtPsgFlg_4=0&txtPsgFlg_5=0&chkCpn=N&selGoSeat1=015&selGoSeat2=&txtPsgCnt1=1&txtPsgCnt2=0&txtGoPage=1&txtGoAbrdDt=20160116&selGoRoom=&useSeatFlg=&useServiceFlg=&checkStnNm=Y&txtMenuId=11&SeandYo=N&txtGoStartCode2=&txtGoEndCode2=&hidEasyTalk=&txtGoStart=서울&txtGoEnd=동대구&start=2016.1.16&selGoHour=00&txtGoHour=000000&selGoYear=2016&selGoMonth=01&selGoDay=16&txtGoYoil=토&txtPsgFlg_1=1
 			$datas = "txtGoStartCode=&txtGoEndCode=&radJobId=1&selGoTrain=05&txtSeatAttCd_4=015&txtSeatAttCd_3=000&txtSeatAttCd_2=000&txtPsgFlg_2=0&txtPsgFlg_3=0&txtPsgFlg_4=0&txtPsgFlg_5=0&chkCpn=N&selGoSeat1=015&selGoSeat2=&txtPsgCnt1=1&txtPsgCnt2=0&selGoRoom=&useSeatFlg=&useServiceFlg=&checkStnNm=Y&txtMenuId=11&SeandYo=N&txtGoStartCode2=&txtGoEndCode2=&hidEasyTalk=&";
 			
 			$date_departure = date("Y.n.d", strtotime($date));
-
+			if ($printall) {
+				$OptprintAll = "true";
+			}
 			$year = date("Y", strtotime($date));
 			$month = date("m", strtotime($date));
 			$day = date("d" , strtotime($date));
@@ -228,7 +261,7 @@
 					$end_city = preg_replace("/([0-9])/", "", $exps[0]);
 					$end_time = $save2[1];
 					$exp2 = explode("'", $exp[5]);
-
+					$where = "false";
 					if ($where == "false") { // 리스트 처리
 						if (preg_match("/btnRsv/i", $exp2[3])) {
 							//$m["status"] = $exp2[7];
@@ -239,7 +272,7 @@
 
 						}
 						error_reporting(0);
-						if ($status == "좌석매진") {
+						if ($OptprintAll) {
 							$m["status"] = $status;
 							$m["train_number"] = trim($atag);
 							$m["city_departure"] = str_replace('<br/>', '', trim($start_city));
@@ -248,7 +281,23 @@
 							$m["time_arrive"] = str_replace('<br/>', '', trim($end_time));
 							$m["dev_parameter"] = $datas;
 							array_push($json_array, $m);
+						} else {
+							switch ($status) {
+								case "좌석매진":
+									$m["status"] = $status;
+									$m["train_number"] = trim($atag);
+									$m["city_departure"] = str_replace('<br/>', '', trim($start_city));
+									$m["city_arrival"] = str_replace('<br/>', '', trim($end_city));
+									$m["time_departure"] = str_replace('<br/>', '', trim($start_time));
+									$m["time_arrive"] = str_replace('<br/>', '', trim($end_time));
+									$m["dev_parameter"] = $datas;
+									array_push($json_array, $m);
+									break;
+							}
 						}
+						
+					
+						
 					} else { // 단일 처리
 						if ($atag == $where_trainNum && str_replace('<br/>', '', trim($end_time)) == $where_time ) { // 값 처리
 
@@ -282,6 +331,7 @@
 		public function train_list($departure, $arrive, $date, $hourInt, $where="false" , $where_trainNum="NULL", $where_time="NULL") {
 			$result = $this->train_check($departure, $arrive, $date, $hourInt);
 			echo json_encode($result);
+			return $result;
 		}
 	}
 
@@ -306,7 +356,7 @@
 			$rest->gcm_send($_GET["gcm_key"]);
 			break;
 		case "list":
-			error_reporting(0);
+			//error_reporting(0);
 			$rest = new RestFunctions();
 			$departure = $_GET["departure"];
 			$arrive = $_GET["arrive"];
@@ -338,6 +388,18 @@
 			$rest->remove_device($gcmKey);
 			break;
 
+		case "newTicketListener":
+			$departure = $_GET["departure"];
+			$arrive = $_GET["arrive"];
+			$date = $_GET["date"]; 
+			$hourInt = $_GET["hourInt"]; 
+			$expire = $_GET["expire"];
+			$train_number = $_GET["train_number"];
+			$rest = new RestFunctions();
+			//newTicketListener($departure, $arrive, $date, $hourInt, $expire)
+			$rest->newTicketListener($departure, $arrive, $date, $hourInt, $expire, $train_number);
+			break;
+
 		case "device_gcm":
 			$rest = new RestFunctions();
 			$db = new db_model();
@@ -350,12 +412,11 @@
 			$m["expire_seconds"] = $_GET["expire_seconds"];
 			$rest->showmessage($m["expire_seconds"]);
 
-
-			//$rest->newTicketListener($gcm_Key, $train_num, $start_location, $start_time, $hourInt, $date, $expire);
+			
 
 			//$gcm_key, $title="티켓봇 알림", $message="남는 티켓 알림", $train_num, $start_location, $dest_location 
-			print_r($m);
-			$rest->device_gcm($m);
+			// echo json_encode($m) 
+			$rest->device_gcm($m); 
 			
 			break;
 	}

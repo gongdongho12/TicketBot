@@ -45,22 +45,30 @@ if (cluster.isMaster) {
 } else {
     var express = require('express');
     var app = express();
-    
+
 	app.get("/request_gcm", function (request, response) {
 		var http = require("request");
-		var gcm_key = request.query.gcm_key;
-		var title = request.query.title;
-		var message = request.query.message;
+		// var train = request.query.train_num;
+		// var start_loc = request.query.start_location;
+		// var dest_loc = request.query.dest_location;
+		// var start_time = request.query.start_time;
+
+		// var gcm_key = request.query.gcm_key;
+		// var title = request.query.title;
+		// var message = request.query.message;
+		// var date = request.query.date;
+
 		//http://1.214.121.11:44444/KMU/test1.php?api=device_gcm&gcm_key=cMWRzzbEGiCe&title=%ED%97%A4%ED%97%A4%ED%97%A4&message=%ED%9D%90%EC%95%84%EC%95%94		
 		var headers = {
-		    'User-Agent':       'Super Agent/0.0.1',
-		    'Content-Type':     'application/x-www-form-urlencoded'
+		    'User-Agent':    'Super Agent/0.0.1',
+		    'Content-Type':  'application/x-www-form-urlencoded'
 		}
+		//http://1.214.121.11:44444/KMU/test1.php?api=device_gcm&gcm_key=cGAgLPaMB-t03Mik5LuHJ_j&train_num=1231&start_location=%EC%9A%B8%EC%82%B0&dest_location=%EC%84%9C%EC%9A%B8&start_time=12:40
 		var options = {
 		    url: 'http://localhost:44444/KMU/test1.php',
 		    method: 'GET',
 		    headers: headers,
-		    qs: {'api': 'device_gcm', 'gcm_key': gcm_key , 'title': title , 'message' : message}
+		    qs: {'api': 'device_gcm', 'gcm_key': request.query.gcm_key , 'train_num' : request.query.train_num , 'start_location' : request.query.start_location, 'dest_location' : request.query.dest_location, 'start_time' : request.query.start_time, 'expire_seconds' : request.query.expire_seconds}
 		}
 
 		http(options, function (error, response, body) {
@@ -70,9 +78,11 @@ if (cluster.isMaster) {
 		    }
 		});
 
-		response.send({"success" : true, "message": "sent gcm" , "delay_seconds" : 15});
+		response.send({"success" : true, "message": "sent gcm" , "delay_seconds" : 15 , "options" : options});
 	});
-
+	
+	
+	
     app.get('/', function (request, response) {
         console.log('Request to worker %d', cluster.worker.id);
         response.send('TicketBot Server with NodeJS server' + cluster.worker.id);
@@ -80,14 +90,15 @@ if (cluster.isMaster) {
     
     app.get("/request_ticket", function (request, response) {
     	// response.send('Request Ticket' + cluster.worker.id);
-    	var gcm_key = request.query.gcm_key;
-    	var train_number = request.query.train_num;
-    	var date = request.query.date; 
-    	var dep_time = request.query.dep_time;
-    	var city_departure = request.query.city_departure;
-    	var city_arrival = request.query.city_arrival;
-    	response.send("request Successed " + gcm_key + "," + train_number + "," + dep_time + "," + city_departure + "," + city_arrival + ", expireSecond : 3600");
-    	ticket_request(gcm_key, train_number, dep_time, city_departure, city_arrival, date, 4);
+    	var departure = request.query.departure;
+    	var arrive = request.query.arrive;
+    	var date = request.query.date;
+    	var hour = request.query.hour;
+    	var expire = request.query.expire;
+    	var train_num = request.query.train_number;
+
+    	response.send("request Successed ");
+    	ticket_request(departure, arrive, date, hour, 3600, train_num);
     	
     });
 
@@ -99,7 +110,7 @@ if (cluster.isMaster) {
 function sleep(time, callback) {
     var stop = new Date().getTime();
     while(new Date().getTime() < stop + time) {
-        ;
+
     }
     callback();
 }
@@ -108,23 +119,24 @@ function request_http() {
 	
 }
 
-function never_call () {
-	console.log("You should never call this function");
-}
 
-
-function ticket_request(gcm_key, train_num, dep_time, city_dep, city_arrival, dep_date, expire_time) {
-	var request = require('request');
+function ticket_request(departure, arrive, date, hour, expire, train_num) {
+	var http = require("request");
  	var counter = 0;
- 	
-	while (counter <= expire_time) {
-		console.log(a);
-		sleep(1000, function() {
-			console.log("Sleeped");
-		});
-
-		counter++;
-		console.log("Counter Up ");
+	//http://1.214.121.11:44444/KMU/test1.php?api=device_gcm&gcm_key=cGAgLPaMB-t03Mik5LuHJ_j&train_num=1231&start_location=%EC%9A%B8%EC%82%B0&dest_location=%EC%84%9C%EC%9A%B8&start_time=12:40
+	var options = {
+	    url: 'http://localhost:44444/KMU/test1.php',
+	    method: 'GET',
+	    qs: {'api': 'newTicketListener', 'departure' : departure , 'arrive' : arrive , 'date' : date, 'hour':hour, 'expire': expire , 'train_number' : train_num}
 	}
+
+	http(options, function (error, response, body) {
+	    if (!error && response.statusCode == 200) {
+	        //console.log(body)
+	    }
+	});
+
+ 	// test1newTicketListener
+
 	
 }
