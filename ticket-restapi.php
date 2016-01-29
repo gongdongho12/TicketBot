@@ -104,7 +104,7 @@
 			echo "success";
 			sleep($intv);
 		}
-		//http://1.214.121.11:44444/KMU/test1.php?api=list&departure=%EC%84%9C%EC%9A%B8&arrive=%EC%9A%B8%EC%82%B0&date=2016-01-29&hour=23
+
 		public function newTicketListener($departure, $arrive, $date, $hourInt, $expire, $train_number) {
 			$do = $this->train_check($departure, $arrive, $date, $hourInt, "true");
 
