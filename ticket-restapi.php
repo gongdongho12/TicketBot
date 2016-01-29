@@ -195,7 +195,6 @@
 
 		public function train_check($departure, $arrive, $date, $hourInt, $printall) {
 			$ch = curl_init();
-			// http://www.letskorail.com/ebizprd/EbizPrdTicketPr21111_i1.do?txtGoStartCode=&txtGoEndCode=&radJobId=1&selGoTrain=05&txtSeatAttCd_4=015&txtSeatAttCd_3=000&txtSeatAttCd_2=000&txtPsgFlg_2=0&txtPsgFlg_3=0&txtPsgFlg_4=0&txtPsgFlg_5=0&chkCpn=N&selGoSeat1=015&selGoSeat2=&txtPsgCnt1=1&txtPsgCnt2=0&txtGoPage=1&txtGoAbrdDt=20160116&selGoRoom=&useSeatFlg=&useServiceFlg=&checkStnNm=Y&txtMenuId=11&SeandYo=N&txtGoStartCode2=&txtGoEndCode2=&hidEasyTalk=&txtGoStart=서울&txtGoEnd=동대구&start=2016.1.16&selGoHour=00&txtGoHour=000000&selGoYear=2016&selGoMonth=01&selGoDay=16&txtGoYoil=토&txtPsgFlg_1=1
 			$datas = "txtGoStartCode=&txtGoEndCode=&radJobId=1&selGoTrain=05&txtSeatAttCd_4=015&txtSeatAttCd_3=000&txtSeatAttCd_2=000&txtPsgFlg_2=0&txtPsgFlg_3=0&txtPsgFlg_4=0&txtPsgFlg_5=0&chkCpn=N&selGoSeat1=015&selGoSeat2=&txtPsgCnt1=1&txtPsgCnt2=0&selGoRoom=&useSeatFlg=&useServiceFlg=&checkStnNm=Y&txtMenuId=11&SeandYo=N&txtGoStartCode2=&txtGoEndCode2=&hidEasyTalk=&";
 			
 			$date_departure = date("Y.n.d", strtotime($date));
@@ -225,7 +224,7 @@
 				$datas .= "&txtGoHour=". $hourInt . "0000";
 			}
 
-			curl_setopt($ch, CURLOPT_URL,"http://www.letskorail.com/ebizprd/EbizPrdTicketPr21111_i1.do");
+			curl_setopt($ch, CURLOPT_URL,"URL_TRAIN_SITE");
 			curl_setopt($ch ,CURLOPT_POST, sizeof($datas));
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $datas);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
