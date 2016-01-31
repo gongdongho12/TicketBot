@@ -58,12 +58,12 @@ if (cluster.isMaster) {
 		// var message = request.query.message;
 		// var date = request.query.date;
 
-		//http://1.214.121.11:44444/KMU/test1.php?api=device_gcm&gcm_key=cMWRzzbEGiCe&title=%ED%97%A4%ED%97%A4%ED%97%A4&message=%ED%9D%90%EC%95%84%EC%95%94		
+	
 		var headers = {
 		    'User-Agent':    'Super Agent/0.0.1',
 		    'Content-Type':  'application/x-www-form-urlencoded'
 		}
-		//http://1.214.121.11:44444/KMU/test1.php?api=device_gcm&gcm_key=cGAgLPaMB-t03Mik5LuHJ_j&train_num=1231&start_location=%EC%9A%B8%EC%82%B0&dest_location=%EC%84%9C%EC%9A%B8&start_time=12:40
+	
 		var options = {
 		    url: 'http://localhost:44444/KMU/test1.php',
 		    method: 'GET',
@@ -123,9 +123,8 @@ function request_http() {
 function ticket_request(departure, arrive, date, hour, expire, train_num) {
 	var http = require("request");
  	var counter = 0;
-	//http://1.214.121.11:44444/KMU/test1.php?api=device_gcm&gcm_key=cGAgLPaMB-t03Mik5LuHJ_j&train_num=1231&start_location=%EC%9A%B8%EC%82%B0&dest_location=%EC%84%9C%EC%9A%B8&start_time=12:40
 	var options = {
-	    url: 'http://localhost:44444/KMU/test1.php',
+	    url: 'PHP FILE ticket-restapi.php',
 	    method: 'GET',
 	    qs: {'api': 'newTicketListener', 'departure' : departure , 'arrive' : arrive , 'date' : date, 'hour':hour, 'expire': expire , 'train_number' : train_num}
 	}
